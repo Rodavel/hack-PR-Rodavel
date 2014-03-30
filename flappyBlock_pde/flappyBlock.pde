@@ -24,8 +24,8 @@ int enemyColorB=0;
 void setup(){
   size(500,500);
   squareSize = int (width*.05);
-  example = new Block(color(255,255,0), 300, 100, squareSize, squareSize, 0.0);
-  target = new Block(color(100,100,100), 300, 300, squareSize, squareSize, 0.0);
+  example = new Block(color(255,255,0), 250, 100, squareSize, squareSize, 0.0);
+  target = new Block(color(100,100,100), 500, 300, squareSize, squareSize, 0.0);
   //frameRate(30);
 }
 
@@ -33,37 +33,28 @@ void draw(){
   background(255);
   fill(0);
   text(score, 50,50);
-  //text(millis(), 100, 100);
-  noStroke();
+
   
-  
-  //player  
-  rectMode(CENTER);
-  
-  rect(x,y,squareSize,squareSize);
   target.display();
   example.display();
   
   
   y = y + speed;
   example.moveWallStop(speed2);
-  //print("y: ");
-  //print(y);
-  
+
   speed = speed + gravity;
   speed2 += gravity;
-  if (example.blockCollision(target)){
+  if (example.blockCollision(target) && !target.targetHit){
+    score += 1;
     target.changeColor(color(255,0,0));
+    target.targetHit = true;
   }
-  else{
+  
+  if(!target.targetHit) {
     target.changeColor(color(0,0,255));
   }
-  //print(" - speed: ");
-  //println(speed);
+
   
-  if(y > height){
-    speed = 0;
-  }
   if (example.hitWall){
     speed2 = 0;
   }
@@ -75,30 +66,10 @@ void draw(){
 //    flappybird's action is more like 
 //    speed = -3;
   
-  //enemy
-  stroke(0);
-  fill(enemyColorR, enemyColorG, enemyColorB);
-  rect(enemyX,enemyY, squareSize,squareSize);
+
   target.moveWallRandom(enemySpeed);
-  enemyX = enemyX + enemySpeed;
+
   
-  if(enemyX < 0){
-    enemyX = 500;
-    enemyY = random(500);
-    enemyColorR = int(random(255));
-    enemyColorG = int(random(255));
-    enemyColorB = int(random(255));
-  }
-  if(x+(squareSize/2)>= enemyX-(squareSize/2) && x-(squareSize/2)<= enemyX+(squareSize/2) && y+(squareSize/2) >= enemyY-(squareSize/2) && y-(squareSize/2)<=enemyY+(squareSize/2)){
-    //println("hit");
-    if(wait >= 30){
-      score++;
-      wait=0;
-    }
-  }
-  if(wait<30)
-    wait++;
-  //println(wait);
   
 }
 
@@ -146,7 +117,9 @@ class Block {
       xpos += deltaX;
       if (xpos < 0){
         xpos = width;
-        ypos = int (random(width));
+        ypos = int (random(blockHeight/2, (height - blockHeight/2)));
+        println(ypos);
+        targetHit = false;
       }
       return;
     }
@@ -179,7 +152,7 @@ class Block {
      int x2Right = other.xpos + other.blockWidth/2;
      int y2Bottom = other.ypos + other.blockHeight/2;
      if (!(x1Left > x2Right || x1Right < x2Left || y1Top > y2Bottom || y1Bottom < y2Top )){
-       targetHit = true;
+       //other.targetHit = true;
        return true;
      }
      else{
